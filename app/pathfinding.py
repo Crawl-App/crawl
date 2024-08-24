@@ -92,32 +92,3 @@ def adjust_rating(rating, num_reviews, review_threshold=500):
     adjusted_rating = rating * (1 - penalisation_factor * 0.4) 
 
     return adjusted_rating
-"""
-# example pubs
-places = [
-    {"name": "Pub A", "location": (40.731, -73.935), "rating": 4.5},
-    {"name": "Pub B", "location": (40.732, -73.936), "rating": 4.0},
-    {"name": "Pub C", "location": (40.733, -73.937), "rating": 3.5},
-    {"name": "Pub D", "location": (40.734, -73.938), "rating": 5.0},
-]
-
-# example Distance matrix format: dist_matrix[i][j] is the distance from place i to place j
-dist_matrix = [
-    [0, 10, 15, 20],
-    [10, 0, 35, 25], 
-    [15, 35, 0, 30], 
-    [20, 25, 30, 0], 
-]
-
-# test
-path, total_cost = a_star(places, dist_matrix, num_stops)
-
-# Print the resulting path and total cost
-if path:
-    print("Pub crawl path:")
-    for idx in path:
-        print(f"{places[idx]['name']} (Rating: {places[idx]['rating']})")
-    print(f"Total cost (distance): {total_cost}")
-else:
-    print("No valid path found.")
-"""
