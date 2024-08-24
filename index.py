@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import googlemaps
-from crawl.app.pathfinding.py import find_pub_crawl
+from app.pathfinding import find_pub_crawl
+import os
 
 app = Flask(__name__)
 
@@ -10,6 +11,13 @@ def generate_pub_crawl():
     Flask endpoint to find a pub crawl route based on the provided coordinates, length, and use_current_loc flag.
     Expected JSON body: { "coordinates": [lat, lng], "length": number_of_stops, "use_current_loc": true/false }
     """
+    # Initialise client based off API key in environment variables
+    # load_dotenv()
+    api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+    print(api_key)
+
+    gmaps = googlemaps.Client(key=api_key)
+    
     data = request.json
 
     # Extract data from the request
@@ -33,9 +41,4 @@ def generate_pub_crawl():
     return jsonify(pub_crawl_result)
 
 if __name__ == '__main__':
-    # Initialise client based off API key in environment variables
-    load_dotenv()
-    api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    gmaps = googlemaps.Client(key=api_key)
-    
     app.run(debug=True)

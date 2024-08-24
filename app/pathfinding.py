@@ -1,7 +1,7 @@
 import heapq
-from geolocation import geolocate
-from maps import get_nearby
-from distances import get_duration_matrix
+from app.geolocation import geolocate
+from app.maps import get_nearby
+from app.distances import get_duration_matrix
 import random
 
 def find_pub_crawl(client, coordinates, length, use_current_loc):
