@@ -5,10 +5,10 @@ def get_nearby(gmaps, coordinates, place_type):
       - coordinates: a tuple of float coordinates
       - place_type: a relevant search term for what the user wishes to do.
     """
-    radius = 5000  # Radius in meters # TODO: Should this always be constant or be configurable?
+    radius = 2000  # Radius in meters # TODO: Should this always be constant or be configurable?
     
     # Perform the Places API nearby search request
-    places_result = gmaps.places_nearby(location=coordinates, radius=radius, keyword=place_type)
+    places_result = gmaps.places_nearby(location=coordinates, keyword=place_type, rank_by='distance')
 
     # Extract the results
     # TODO: Make me asynchronous

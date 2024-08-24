@@ -8,7 +8,7 @@ def main():
     
     length = int(input("How many stops? "))
 
-    crawl, cost = find_pub_crawl(gmaps, (0, 0), length)
+    crawl, cost = find_pub_crawl(gmaps, (-33.8590594976628, 151.20814845161303), length, False)
     
     for i, pub in enumerate(crawl):
         print(f"Stop {i}: {pub[0]}")

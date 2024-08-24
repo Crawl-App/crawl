@@ -2,8 +2,9 @@ import heapq
 from geolocation import geolocate
 from maps import get_nearby
 from distances import get_duration_matrix
+import random
 
-def find_pub_crawl(client, coordinates, length):
+def find_pub_crawl(client, coordinates, length, use_current_loc):
     """
     Given a Google Maps client and a set of coordinates to start from, 
     find a pub crawl of a certain length.
@@ -15,11 +16,14 @@ def find_pub_crawl(client, coordinates, length):
 
     # find user's location (for now)
     # TODO get coordinates from front end
-    client_geolocation = geolocate(client)
-    current_coord = (client_geolocation['location']['lat'], client_geolocation['location']['lng']) #TODO delete me later
+    if use_current_loc:
+        client_geolocation = geolocate(client)
+        current_coord = (client_geolocation['location']['lat'], client_geolocation['location']['lng']) #TODO delete me later
+    else:
+        current_coord = coordinates
     
     # find top bars nearby
-    pubs = get_nearby(client, current_coord, 'pub')
+    pubs = get_nearby(client, current_coord, 'pub bar')
     
     destinations = {place.get('name'): (place['geometry']['location']['lat'], place['geometry']['location']['lng']) for place in pubs[:9]}
         
@@ -40,27 +44,54 @@ def a_star(places, dist_matrix, num_stops):
         - dist_matrix: a matrix of distances between the places in the list
         - num_stops: an integer representing the number of stops intended in the crawl.
     """
+    # Compute maximums to normalise weightings
+    max_distance = max(max(row) for row in dist_matrix if row)
+    max_rating = max((adjust_rating(place.get('rating'), place.get('user_ratings_total')) for place in places if place.get('rating') is not None), default=1)
+
     start = 0  # Start from the first pub (index 0)
     queue = []
-    heapq.heappush(queue, (0, start, [start]))  # (cost, current_pub, path)
+    heapq.heappush(queue, (0, start, [start], 0))  # (cost, current_pub, path)
 
     while queue:
-        cost, current_pub, path = heapq.heappop(queue)
+        total_cost, current_pub, path, tot_distance = heapq.heappop(queue)
 
         # Check if the path contains the required number of stops. If so, stop.
         if len(path) == num_stops + 1:
             pubs = [(places[i]['name'], places[i]['geometry']['location']['lat'], places[i]['geometry']['location']['lng']) for i in path]
-            return pubs, cost
+            return pubs, tot_distance
 
         for next_pub in range(len(places)):
             if next_pub not in path:
-                next_cost = cost + dist_matrix[current_pub][next_pub]
-                heuristic = 1000 if not places[next_pub]['rating'] else (1 / places[next_pub]['rating']) # Lower rating gives higher heuristic cost
-                total_cost = next_cost + heuristic
-                heapq.heappush(queue, (total_cost, next_pub, path + [next_pub]))
+                distance = dist_matrix[current_pub][next_pub]
+                normalised_distance = distance / max_distance
+                
+                rating = adjust_rating(places[next_pub]['rating'], places[next_pub]['user_ratings_total'])
+                normalised_rating = (1) if not rating else 1 - (rating / max_rating)  # Lower rating gives higher heuristic cost
+                
+                cost = 0.3 * normalised_distance + 0.6 * normalised_rating  + 0.1 * random.uniform(0, 1)# rating is heuristic
+                heapq.heappush(queue, (total_cost + cost, next_pub, path + [next_pub], tot_distance + distance))
 
     return None, None
 
+
+def adjust_rating(rating, num_reviews, review_threshold=500):
+    """
+    Adjusts the rating based on the number of reviews to penalize high ratings with low review counts.
+    
+    :param rating: Original rating of the place.
+    :param num_reviews: Number of reviews the place has received.
+    :param review_threshold: The threshold number of reviews considered reliable.
+    :return: Adjusted rating after penalisation.
+    """
+    if num_reviews >= review_threshold:
+        return rating  # No adjustment for reliable number of reviews
+
+    # Calculate the penalisation factor: more penalisation for fewer reviews
+    penalisation_factor = (review_threshold - num_reviews) / review_threshold
+    
+    adjusted_rating = rating * (1 - penalisation_factor * 0.4) 
+
+    return adjusted_rating
 """
 # example pubs
 places = [
