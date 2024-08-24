@@ -1,25 +1,17 @@
-import googlemaps
-import os
-from dotenv import load_dotenv
-
-# Load the API key from .env file
-load_dotenv()
-api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-gmaps = googlemaps.Client(key=api_key)
-
-def get_walking_duration_matrix_in_minutes(locations):
+def get_duration_matrix(client, locations):
     """
     Given a dictionary of locations, returns a matrix of walking durations between each location in minutes.
     
+    #TODO add client 
     :param locations: A dictionary where keys are location names and values are tuples of (latitude, longitude).
     :return: A matrix containing walking durations between each location (in minutes).
     """
     # Extracting the latitudes and longitudes from the dictionary
     origins = [location for location in locations.values()]
     destinations = origins.copy()  # In this case, destinations are the same as origins
-
+    
     # Perform the distance matrix request with walking mode
-    distance_matrix = gmaps.distance_matrix(origins, destinations, mode='walking')
+    distance_matrix = client.distance_matrix(origins, destinations, mode='walking')
 
     # Initialize the matrix to store durations in minutes
     duration_matrix_values = []
@@ -36,6 +28,10 @@ def get_walking_duration_matrix_in_minutes(locations):
     return duration_matrix_values
 
 def main():
+    load_dotenv()
+    api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+    gmaps = googlemaps.Client(key=api_key)
+    
     # Example usage with the provided pub locations:
     locations = {
         "New Britannia": (-33.8885236, 151.1964246),
@@ -45,7 +41,7 @@ def main():
     }
 
     # Get the walking duration matrix in minutes
-    duration_matrix = get_walking_duration_matrix_in_minutes(locations)
+    duration_matrix = get_duration_matrix(gmaps, locations)
 
     # Print the results
     print("Walking Duration Matrix (minutes):")

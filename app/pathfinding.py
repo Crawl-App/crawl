@@ -1,4 +1,34 @@
 import heapq
+from geolocation import geolocate
+from maps import get_nearby
+from distances import get_duration_matrix
+
+def find_pub_crawl(client, coordinates, length):
+    """
+    Given a Google Maps client and a set of coordinates to start from, 
+    find a pub crawl of a certain length.
+      - client: Google Maps client initialised with key
+      - coordinates: a tuple of the latitude and longitude of the starting point
+      - length: the number of stops in the pub crawl
+    Returns: #TODO
+    """
+
+    # find user's location (for now)
+    # TODO get coordinates from front end
+    client_geolocation = geolocate(client)
+    current_coord = (client_geolocation['location']['lat'], client_geolocation['location']['lng']) #TODO delete me later
+    
+    # find top bars nearby
+    pubs = get_nearby(client, current_coord, 'pub')
+    
+    destinations = {place.get('name'): (place['geometry']['location']['lat'], place['geometry']['location']['lng']) for place in pubs[:9]}
+        
+    # find distances between places.
+    distances = get_duration_matrix(client, {'start': current_coord} | destinations)
+    
+    # Run A* to compute result.
+    return a_star([{'name': 'start', 'geometry': {'location': {'lat': current_coord[0], 'lng': current_coord[1]}}}] + pubs[:9], distances, length)
+    
 
 def a_star(places, dist_matrix, num_stops):
     """
@@ -18,13 +48,14 @@ def a_star(places, dist_matrix, num_stops):
         cost, current_pub, path = heapq.heappop(queue)
 
         # Check if the path contains the required number of stops. If so, stop.
-        if len(path) == num_stops:
-            return path, cost
+        if len(path) == num_stops + 1:
+            pubs = [(places[i]['name'], places[i]['geometry']['location']['lat'], places[i]['geometry']['location']['lng']) for i in path]
+            return pubs, cost
 
         for next_pub in range(len(places)):
             if next_pub not in path:
                 next_cost = cost + dist_matrix[current_pub][next_pub]
-                heuristic = 1 / places[next_pub]['rating']  # Lower rating gives higher heuristic cost
+                heuristic = 1000 if not places[next_pub]['rating'] else (1 / places[next_pub]['rating']) # Lower rating gives higher heuristic cost
                 total_cost = next_cost + heuristic
                 heapq.heappush(queue, (total_cost, next_pub, path + [next_pub]))
 

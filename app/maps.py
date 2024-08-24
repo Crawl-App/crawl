@@ -1,14 +1,5 @@
-import googlemaps
-import os
-from dotenv import load_dotenv
-
-# Initialise client based off API key in environment variables
-load_dotenv()
-api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-gmaps = googlemaps.Client(key=api_key)
-
 # Define the location (latitude, longitude) and the search parameters
-def get_nearby(coordinates, place_type):
+def get_nearby(gmaps, coordinates, place_type):
     """
     Gets the nearby 'place's based on the given coordinates.
       - coordinates: a tuple of float coordinates
@@ -19,10 +10,6 @@ def get_nearby(coordinates, place_type):
     # Perform the Places API nearby search request
     places_result = gmaps.places_nearby(location=coordinates, radius=radius, keyword=place_type)
 
-<<<<<<< HEAD
-# Perform the Places API nearby search request
-places_result = gmaps.places_nearby(location=location, radius=radius, keyword=place_type)
-=======
     # Extract the results
     # TODO: Make me asynchronous
     return places_result.get('results', [])
@@ -30,7 +17,6 @@ places_result = gmaps.places_nearby(location=location, radius=radius, keyword=pl
 """
 # test
 places = get_nearby((-33.88928457080163, 151.19347275195244), 'pub')
->>>>>>> 4365e4ebde9bd0cb94e2af9d8d7cd686261ca65b
 
 
 # Print details of each place found
@@ -44,6 +30,4 @@ for place in places:
             Rating: {rating} from {place.get('user_ratings_total')} reviews. \
             Price level = {price_level}\n")    
 """        
-
-# use Distance Matrix API for possible distances -> one request then 'cache' response to access in algo
 
