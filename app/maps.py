@@ -13,7 +13,7 @@ radius = 1000  # Radius in meters
 place_type = 'pub'
 
 # Perform the Places API nearby search request
-places_result = None #gmaps.places_nearby(location=location, radius=radius, keyword=place_type)
+places_result = gmaps.places_nearby(location=location, radius=radius, keyword=place_type)
 
 # Extract the results
 places = places_result.get('results', [])
