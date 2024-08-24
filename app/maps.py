@@ -8,7 +8,6 @@ api_key = os.getenv('GOOGLE_MAPS_API_KEY')
 gmaps = googlemaps.Client(key=api_key)
 
 # Define the location (latitude, longitude) and the search parameters
-
 def get_nearby(coordinates, place_type):
     """
     Gets the nearby 'place's based on the given coordinates.
@@ -24,6 +23,7 @@ def get_nearby(coordinates, place_type):
     # TODO: Make me asynchronous
     return places_result.get('results', [])
 
+"""
 # test
 places = get_nearby((-33.88928457080163, 151.19347275195244), 'pub')
 
@@ -37,7 +37,8 @@ for place in places:
         price_level = ('$'*place.get('price_level') if place.get('price_level') else 'None')
         print(f"Name: {name}, Address: {address}, \
             Rating: {rating} from {place.get('user_ratings_total')} reviews. \
-            Price level = {price_level}\n")
-        
+            Price level = {price_level}\n")    
+"""        
+
 # use Distance Matrix API for possible distances -> one request then 'cache' response to access in algo
 
