@@ -1,0 +1,33 @@
+import googlemaps
+import os
+from dotenv import load_dotenv
+
+# Initialise client based off API key in environment variables
+load_dotenv()
+api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+gmaps = googlemaps.Client(key=api_key)
+
+# Define the location (latitude, longitude) and the search parameters
+location = (-33.88928457080163, 151.19347275195244)  # TODO: Change this to user's current 
+radius = 1000  # Radius in meters
+place_type = 'pub'
+
+# Perform the Places API nearby search request
+places_result = None #gmaps.places_nearby(location=location, radius=radius, keyword=place_type)
+
+# Extract the results
+places = places_result.get('results', [])
+
+# Print details of each place found
+for place in places:
+    if place.get('rating'):
+        rating = place.get('rating')
+        name = place.get('name')
+        address = place.get('vicinity')
+        price_level = ('$'*place.get('price_level') if place.get('price_level') else 'None')
+        print(f"Name: {name}, Address: {address}, \
+              Rating: {rating} from {place.get('user_ratings_total')} reviews. \
+              Price level = {price_level}\n")
+
+# use Distance Matrix API for possible distances -> one request then 'cache' response to access in algo
+
